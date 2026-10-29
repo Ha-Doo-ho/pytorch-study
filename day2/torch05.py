@@ -17,12 +17,14 @@ from torch.optim import Adam
 def make_DataSet(x_train, x_val, y_train, y_val, batch_size = 32) :
 
     # 데이터 텐서로 변환
+    # tensor는 파이토치(PyTorch)나 텐서플로우(TensorFlow)에서 연산을 수행하는 기본 단위이다. 
     x_train_tensor = torch.tensor(x_train, dtype=torch.float32)
     y_train_tensor = torch.tensor(y_train.values, dtype=torch.float32).view(-1, 1)
     x_val_tensor = torch.tensor(x_val, dtype=torch.float32)
     y_val_tensor = torch.tensor(y_val.values, dtype=torch.float32).view(-1, 1)
 
     # TensorDataset 생성 : 텐서 데이터셋으로 합치기
+    # TensorDataset: 파이토치 등에서 여러 개의 텐서를 하나의 세트로 묶어 관리하기 위한 컨테이너(Dataset 클래스)
     train_dataset = TensorDataset(x_train_tensor, y_train_tensor)
 
     # DataLoader 생성
@@ -115,7 +117,7 @@ print(x.shape, y.shape) #torch.Size([4, 3]) torch.Size([4, 1])
 # 2 모델 구성
 
 # 학습해야 하는 데이터셋의 열이 3이므로 무조건 기억할 것.  --> 무조건 행무시 열우선 
-# 열과 같은 말: feature, attribute, dimension, column, 특징, 속성, 특성, 차원 . . . 외울 것.
+# 열과 같은 말: feature, attribute, dimension, column, node, 특징, 속성, 특성, 노드 수,차원 . . . 외울 것.
 # nn.Linear() 에 들어가는 인수가 in_feature, out_feature이다. 열 숫자 넣는 것이다.
 
 # nn.Seqential 혹은 nn.모델 형태 에 ㅈㄴ 많이 적는다 정도로만 이해하면 된다.
@@ -137,4 +139,4 @@ epochs = 20
 for t in range(epochs):
     train_loss = train(train_loader, model, loss_fn, optimizer, device) 
     val_loss = evaluate(x_val_ts, y_val_ts, model, loss_fn, device)
-    print(f"Epoch:{t + 1}, train_loss: {train_loss: 4f}, val_loss: {val_loss: 4f}")
+    print(f"Epoch:{t + 1}, train_loss: {train_loss: .4f}, val_loss: {val_loss: .4f}")
