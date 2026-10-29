@@ -12,20 +12,21 @@ from torch import nn
 from torch.utils.data import DataLoader, TensorDataset
 from torch.optim import Adam
 from torch import tensor
+from torch.cuda import is_available
 
 def make_DataSet(x_train, x_val, y_train, y_val, batch_size=32): #batch_size를 미리 정할 수 있는데, 디폴트가 32이다.
     # 텐서 데이터로 변환. (텐서 데이터셋을 만드려면 우선 데이터를 텐서로 변환해야 한다.)
     x_train_tensor = tensor(data=x_train, dtype=torch.float32)
-    y_train_tensor = tensor(data=y_train.values, dtype=torch.float32).view(-1,1)
+    y_train_tensor = tensor(data=y_train.values, dtype=torch.float32).view(-1,1) # numpy의 reshape와 똑같은 기능을 한다.
     x_val_tensor = tensor(data=x_val, dtype=torch.float32)
     y_val_tensor = tensor(data=y_val.values, dtype=torch.float32).view(-1,1)    
     
-    # 텐서 데이터셋 합치기
+    # 텐서 데이터셋 합치기 --> 이때 train데이터만 TensorDatataSet이 된다. 미니배치 단위로 학습시키기 위함이다.
     train_dataset = TensorDataset(x_train_tensor, y_train_tensor)    
 
     #DataLoader 생성
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-    return train_loader, x_val_tensor, y_val_tensor
+    return train_loader, x_val_tensor, y_val_tensor # validation은 굳이 데이터로더로 만들지 않는다. 마치 시험문제를 주면 문제 3개씩 주고 3개씩 풀어봐가 아닌, 문제 전부 다 주고 다 풀어봐 이렇게 하는 것처럼.
 
 def train(dataloader, model, loss_fn, optimizer, device): #핵심은 미니배치 단위이다.
     size = len(dataloader.dataset) # 전체 데이터셋의 크기
@@ -35,12 +36,12 @@ def train(dataloader, model, loss_fn, optimizer, device): #핵심은 미니배�
     for batch, (x,y) in enumerate(dataloader): # ※ 미니배치 단위로 다음과 같은 작업이 진행된다.
         x,y = x.to(device), y.to(device)
         
-         # Feed Forward
+         # Feed Forward --> 순전파.
         pred = model(x)
         loss = loss_fn(pred, y)
         tr_loss += loss
 
-        # Backpropagation → 가중치 업데이트 (반드시 미니배치 단위로 가중치가 업데이트 된다는 것을 알아야 함)
+        # ★★Backpropagation → 가중치 업데이트 (반드시 미니배치 단위로 가중치가 업데이트 된다는 것을 알아야 함)
         loss.backward()             # 역전파를 통해 모델의 각 파라미터에 대한 손실의 기울기를 계산
         optimizer.step()            # 옵티마이저가 계산된 기울기를 사용하여 모델의 파라미터를 업데이트
         optimizer.zero_grad()       # 옵티마이저의 기울기 값 초기화. 기울기가 누적되는 것 방지
@@ -93,10 +94,11 @@ x_train, x_val, y_train, y_val = train_test_split(x, y, train_size=0.8, random_s
 print(type(x_train)) # <class 'pandas.DataFrame'> --> 어떻게 보면 2차원 행렬이다. 행렬은 Pandas에서 DataFrame이라고 부른다.
 print(type(y_train)) # <class 'pandas.Series'> --> 어떻게 보면 1차원 벡터이다. 벡터는 Pandas에서 Series라고 부른다.
 
-# 1-4 스케일링
+# 1-4 스케일링 --> 넘파이로 바꾼다. 그래서 y_train_tensor나 y_val_tensor는 판다스의 Series라서 NumPy로 바꿔야 한다. 
 scaler = MinMaxScaler()
 x_train = scaler.fit_transform(x_train)
 x_val = scaler.transform(x_val)
+print(type(x_train), type(x_val)) #<class 'numpy.ndarray'> <class 'numpy.ndarray'>
 
 # 2 모델구성
 train_loader, x_val_tensor, y_val_tensor = make_DataSet(x_train, x_val, y_train, y_val, 32)
