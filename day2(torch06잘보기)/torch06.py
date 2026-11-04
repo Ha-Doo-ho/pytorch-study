@@ -96,7 +96,7 @@ y = data["medv"]
 # 1-3 데이터 분할
 x_train, x_val, y_train, y_val = train_test_split(x, y, train_size=0.8, random_state=11)
 
-# 1-4 스케일링
+# 1-4 스케일링 --> 넘파이로 바꾼다. 그래서 y_train_tensor나 y_val_tensor는 판다스의 Series라서 NumPy로 바꿔야 한다. 
 scaler = MinMaxScaler()
 x_train = scaler.fit_transform(x_train)
 x_val = scaler.fit_transform(x_val)
