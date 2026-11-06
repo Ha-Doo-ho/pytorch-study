@@ -10,12 +10,14 @@ from sklearn.preprocessing import RobustScaler, StandardScaler, MinMaxScaler
 
 import torch
 from torch import tensor
-from torch.nn import Sequential, Dropout, Linear, Conv2d, MaxPool1d, ReLU
+from torch.nn import Sequential, Dropout, Linear, Conv2d, MaxPool2d, ReLU, Flatten, BCELoss
+from torch.optim import Adam
 from torch.utils.data import TensorDataset , DataLoader
 from torchsummary import summary 
 from torch.cuda import is_available
 from torchvision import datasets, transforms
 from torchvision.transforms import ToTensor
+
 
 
 if is_available():
@@ -31,7 +33,7 @@ def makeDataSet(x_train, x_val, y_train, y_val, batch_size=32):
     y_val_tensor = tensor(data=y_val, dtype=torch.long)
     
     train_Dataset = TensorDataset(x_train_tensor, y_train_tensor)
-    train_DataLoader = DataLoader(train_Dataset)
+    train_DataLoader = DataLoader(train_Dataset, batch_size=batch_size, shuffle=True)
     
     return train_DataLoader, x_val_tensor, y_val_tensor
 
@@ -40,7 +42,7 @@ def train(device, model, train_DataLoader, loss_fn, optimizer):
     num_batches = len(DataLoader)
     train_loss = 0
     
-    for batch_idx, (x,y) in enumerate(DataLoader):
+    for batch_idx, (x,y) in enumerate(train_DataLoader):
         x = x.to(device)
         y = y.to(device)
         
@@ -60,8 +62,8 @@ def train(device, model, train_DataLoader, loss_fn, optimizer):
 
 def evaluate(device, model, x_val_tensor, y_val_tensor, loss_fn):
     with torch.no_grad():
-        x = x_val_tensor.to()
-        y = y_val_tensor.to()
+        x = x_val_tensor.to(device)
+        y = y_val_tensor.to(device)
         
         pred = model(x)
         eval_loss = loss_fn(pred, y)
@@ -97,8 +99,49 @@ x_test = x_test / 255
 
 print(x_val.shape, type(x_val))
 exit()
-x_val = x_val.reshape(-1, )
+x_val = x_val.reshape(-1, 1, 28, 28)
+x_test = x_test.reshape(-1, 1, 28, 28)
 
-# 
+# 2 모델 선언 
+makeDataSet(train_dataset,batch_size=32)
+
+model = Sequential(
+    Conv2d(in_channels=1, out_channels=8, kernel_size=3, stride=1, padding="same"),
+    ReLU(),
+    MaxPool2d(kernel_size=2, stride=2),
+    
+    Conv2d(in_channels=8, out_channels=16, kernel_size=3, stride=1, padding="same"),
+    ReLU(),
+    MaxPool2d(kernel_size=2, stride=2),
+    
+    Conv2d(in_channels=8, out_channels=16, kernel_size=3, stride=1, padding="valid"),
+    ReLU(),
+    MaxPool2d(kernel_size=2, stride=2),
+    
+    Flatten(),
+    Linear(in_features = 16 * 14 * 14, out_features=30),
+    ReLU(),
+    
+    Linear(30, 10)
+).to(device)
+
+
+# 3 컴파일 및 훈련
+loss_fn = BCELoss()
+optimizer = Adam(model.parameters, lr=0.003)
+
 batch_size = 64
 train_dataloader = DataLoader(train_dataset, batch_size=batch_size)
+epochs = 32
+
+train_loss_list = []
+val_loss_list = []
+
+for i in range(epochs):
+    train_loss = train(device=device, model=model, train_DataLoader=train_dataloader, loss_fn=loss)
+    eval_loss = evaluate(device, model, x_val_tensor, y_val_tensor, loss_fn)
+    
+    train_loss_list.append(train_loss)
+    val_loss_list.append(eval_loss)
+    
+    

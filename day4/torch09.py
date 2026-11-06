@@ -22,7 +22,7 @@ def make_DataSet(x_train, x_val, y_train, y_val, batch_size = 32):
     y_val_tensor = tensor(data=y_val, dtype=torch.long).reshape(-1, 1)
 
     train_dataset = TensorDataset(x_train_tensor, y_train_tensor)
-    train_DataLoader = DataLoader(train_dataset, batch_size=batch_size)
+    train_DataLoader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     
     return train_DataLoader, x_val_tensor, y_val_tensor
 

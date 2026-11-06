@@ -27,14 +27,14 @@ else:
     device = "cpu"
 
 # 1 데이터
-def makeDataSet(x_train, y_train, x_val, y_val, batch_size):
+def makeDataSet(x_train, y_train, x_val, y_val, batch_size=32):
     x_train_tensor = tensor(data=x_train, dtype=torch.float)
     x_val_tensor = tensor(data=x_val, dtype=torch.float)
     y_train_tensor = tensor(data=y_train, dtype=torch.long)
     y_val_tensor = tensor(data= y_val, dtype=torch.long)
     
     train_Dataset = TensorDataset(x_train_tensor, y_train_tensor)
-    train_DataLoader = DataLoader(dataset=train_Dataset, batch_size=32, shuffle = True)
+    train_DataLoader = DataLoader(dataset=train_Dataset, batch_size=batch_size, shuffle = True)
     
     return train_DataLoader, x_val_tensor, y_val_tensor
 
@@ -125,26 +125,29 @@ x_test = x_test.reshape(-1, 1, 28, 28)/ 255
 print(x_val.shape, x_test.shape) # torch.Size([5000, 1, 28, 28]) torch.Size([5000, 1, 28, 28])
 
 # 2 모델 설계
+# 핵심은 컨볼루션층 (Conv2d, Activation_fn, Pooling) 통과할 때마다, padding을 걸지 않으면, 절반으로 노드 수가 줄어든다는  것이다.
+train_dataloader = DataLoader(train_dataset, batch_size = 64)
 model = nn.Sequential(
     nn.Conv2d(1, 8, kernel_size=3, stride=1, padding="same"),  # input = 1*28*28, output = 8*28*28
     nn.ReLU(),
+    # Conv와 ReLU를 거친 데이터는 다음 형태이다. (배치, out_channels, 높이, 너비) 배치가 현재 32이므로 (32,8,28,28)이다.
+    # 정규화한 결과의 크기와 위치를 조절하는 학습 파라미터 γ, β도 "채널마다" 하나씩 갖는다. 
     nn.MaxPool2d(kernel_size=2, stride=2, padding=0),     # input = 8*28*28, output = 8*14*14
+    
     nn.Flatten(),
-    nn.Linear(8*14*14, 64),    # 이전 레이어에서의 출력 수를 계산해서 입력으로 넣어야 함.
+    nn.Linear(8*14*14, 64),    # 이전 레이어에서의 출력 수를 계산해서 입력으로 넣어야 함. 
     nn.ReLU(),
     nn.Linear(64, 10)
 ).to(device)
 
 summary(model, input_size = (1,28,28))
 
+# 3 컴파일 및 훈련
 loss_fn = nn.CrossEntropyLoss() # 정보량과 희소성의 관점에서 바라보면 됨.
 optimizer = Adam(model.parameters(), lr=0.001)
 
 epochs = 10
 tr_loss_list, val_loss_list = [], []
-
-batch_size = 64
-train_dataloader = DataLoader(train_dataset, batch_size = batch_size)
 
 for t in range(epochs):
     tr_loss = train(model, device, train_dataloader, loss_fn, optimizer)
