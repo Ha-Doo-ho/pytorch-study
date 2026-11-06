@@ -42,8 +42,8 @@ def dl_learning_curve(tr_loss_list, val_loss_list):
 def make_Dataset(x_train, x_val, y_train, y_val, batch_size=32):
     x_train_tesor = tensor(data=x_train, dtype=torch.float) # float == torch.float == torch.float32이다. 다만 torch.float이나 torch.float32를 사용하는 이유는 가독성 때문이다. 
     x_val_tensor = tensor(data=x_val, dtype=torch.float)
-    y_trian_tensor = tensor(data=y_train.values, dtype=torch.float).view(-1,1)
-    y_val_tensor = tensor(data=y_val.values, dtype=torch.float).view(-1,1)
+    y_trian_tensor = tensor(data=y_train.values, dtype=torch.float).view(-1,1) # values 혹은 to_numpy()를 사용하는 이유는 데이터셋의 타입이 Pandas의 데이터타입이기 때문이다. 
+    y_val_tensor = tensor(data=y_val.values, dtype=torch.float).view(-1,1)     # 파이토치의 데이터타입에서 Numpy로 넘어갈 경우에는 .numpy()이다. 
     
     train_dataset = TensorDataset(x_train_tesor, y_trian_tensor) # 여기에는 입력 데이터 x와 정답 데이터 y가 쌍(Pair)으로 보관되어 있다. 
     
