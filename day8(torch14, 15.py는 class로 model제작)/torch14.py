@@ -22,7 +22,7 @@ from torchvision.transforms import ToTensor
 # 2 모델 생성
 # 클래스 방식으로는 다음과 같이 작성하며 보통 클래스 방식으로 많이들 작성한다.
 class CustomCNN(Module): #모든 모델은 Module을 상속받는다. PyTorch 신경망의 기본 클래스가 Module이기 때문이다.
-    def __init__(self, n_node): # kwargs: Keyword Arguments: 키=value 형태로 함수에 전달하는 인자. 이렇게 쓰려면 {}(딕셔너리) 내부에 넣어야 하고 {}안에 들어있는 것 넣으려면 ** 필요함.
+    def __init__(self, n_class): # kwargs: Keyword Arguments: 키=value 형태로 함수에 전달하는 인자. 이렇게 쓰려면 {}(딕셔너리) 내부에 넣어야 하고 {}안에 들어있는 것 넣으려면 ** 필요함.
         super(CustomCNN, self).__init__() # 기준 클래스, 그에 대한 객체(this임)순서. # 부모인 Module의 "초기화 메서드 호출함"으로써 계속 다른 형태로 제작이 가능하다.
                                           # 바어있어도 된다. super().__init__ 처럼 비워도 된다.
         

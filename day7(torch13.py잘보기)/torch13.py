@@ -32,7 +32,7 @@ def dl_learning_curve(tr_loss_list, val_loss_list, val_acc_list):
     plt.grid()
     
     plt.savefig(
-    "/home/ma1/dooho/project/learning_curve.png",
+    "/home/ma1/dooho/project/day7(torch13.py잘보기)/torch13/learning_curve.png",
     dpi=150,
     bbox_inches="tight"
 )
@@ -220,7 +220,7 @@ disp.plot()
 plt.xticks(rotation=90)
 
 plt.savefig(
-    "/home/ma1/dooho/project/confusion_metrix.png",
+    "/home/ma1/dooho/project/day7(torch13.py잘보기)/torch13/confusion_metrix.png",
     dpi=150,
     bbox_inches="tight"
 )
