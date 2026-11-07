@@ -118,7 +118,7 @@ x_train, x_val, y_train, y_val = train_test_split(train_data, train_labels, trai
 _, x_test, _, y_test = train_test_split(test_data, test_labels, test_size = 9000, random_state = 10, stratify = test_labels)
 
 print(x_train.shape, y_train.shape) #(20000,) --> 벡터임 답지라는 뜻.
-
+print("y_test 타입:", type(y_test))
 # 1-4 스케일링
 
 # 2 모델 구성
@@ -150,7 +150,7 @@ model = Sequential(
     
     # 판단
     Flatten(),
-    Linear(in_features=3*3*32, out_features= 128),
+    Linear(in_features=3*3*32, out_features= 128), #마지막 계산 잘해야 한다. 행/열크기가 28이었지만 14 -> 7 -> 3 이 된다. 
     ReLU(),
     
     Linear(in_features=128, out_features=64),

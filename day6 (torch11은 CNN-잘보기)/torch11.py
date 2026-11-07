@@ -128,7 +128,7 @@ print(x_val.shape, x_test.shape) # torch.Size([5000, 1, 28, 28]) torch.Size([500
 # 핵심은 컨볼루션층 (Conv2d, Activation_fn, Pooling) 통과할 때마다, padding을 걸지 않으면, 절반으로 노드 수가 줄어든다는  것이다.
 train_dataloader = DataLoader(train_dataset, batch_size = 64)
 model = nn.Sequential(
-    nn.Conv2d(1, 8, kernel_size=3, stride=1, padding="same"),  # input = 1*28*28, output = 8*28*28
+    nn.Conv2d(in_channels=1, out_channels=8, kernel_size=3, stride=1, padding="same"),  # input = 1*28*28, output = 8*28*28
     nn.ReLU(),
     # Conv와 ReLU를 거친 데이터는 다음 형태이다. (배치, out_channels, 높이, 너비) 배치가 현재 32이므로 (32,8,28,28)이다.
     # 정규화한 결과의 크기와 위치를 조절하는 학습 파라미터 γ, β도 "채널마다" 하나씩 갖는다. 
